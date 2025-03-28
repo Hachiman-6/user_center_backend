@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    #驱动类名称
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    #数据库连接的url
+    url: jdbc:mysql://localhost:3306/yupi
+    #连接数据库的用户名
+    username: root
+    #连接数据库的密码
+    password: djx040507
+  #session 失效时间
+  session:
+    timeout: 86400
+
+
+
