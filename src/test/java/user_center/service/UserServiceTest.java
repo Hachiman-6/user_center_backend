@@ -1,6 +1,9 @@
 package user_center.service;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,5 +63,12 @@ class UserServiceTest {
 //        result = userService.userRegister(userAccount, userPassword, checkPassword);
 //        Assertions.assertEquals(-1, result);
 
+    }
+
+    @Test
+    void searchUsersByTags() {
+        List<String> tagNameList = Arrays.asList("java","python");
+        List<User> userList = userService.searchUsersByTags(tagNameList);
+        Assertions.assertNotNull(userList);
     }
 }

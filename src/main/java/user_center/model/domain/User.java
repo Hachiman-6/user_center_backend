@@ -83,4 +83,9 @@ public class User {
      * 星球编号
      */
     private String planetCode;
+
+    /**
+     * 标签列表json
+     */
+    private String tags;
 }
