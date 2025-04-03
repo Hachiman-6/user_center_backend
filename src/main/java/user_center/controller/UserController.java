@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import user_center.common.BaseResponse;
 import user_center.common.ErrorCode;
@@ -27,6 +28,7 @@ import static user_center.constant.userConstant.USER_LOGIN_STATE;
  */
 @RestController
 @RequestMapping("/user")
+@CrossOrigin(origins = { "http://localhost:3000" })
 public class UserController {
 
     @Resource
@@ -84,6 +86,15 @@ public class UserController {
         List<User> userList = userService.list(queryWrapper);
         List<User> result = userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
         return ResponseUtils.success(result);
+    }
+
+    @GetMapping("/search/tags")
+    public BaseResponse<List<User>> searchUsersByTags(@RequestParam(required = false) List<String> tagNameList){
+        if(CollectionUtils.isEmpty(tagNameList)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        List<User> userList = userService.searchUsersByTags(tagNameList);
+        return ResponseUtils.success(userList);
     }
 
     @PostMapping("/delete")

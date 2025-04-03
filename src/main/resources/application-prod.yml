@@ -12,5 +12,10 @@ spring:
   session:
     timeout: 86400
 
-
+#生产环境下不生成Knife4j接口文档
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
 
