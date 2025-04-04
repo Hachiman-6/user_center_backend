@@ -12,14 +12,24 @@ spring:
     username: root
     #连接数据库的密码
     password: djx040507
-  #session 失效时间
+  #session 失效时间(分钟)
   session:
     timeout: 86400
+  #redis配置
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: djx040507
+      database: 0
 
 server:
   port: 8080
   servlet:
     context-path: /api
+    session:
+      cookie:
+        domain: localhost
 
 springdoc:
   swagger-ui:

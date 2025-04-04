@@ -75,7 +75,7 @@ public class UserController {
 
     @GetMapping("/search")
     public BaseResponse<List<User>> searchUsers(String username, HttpServletRequest request){
-        if(!isAdmin(request)){
+        if(!userService.isAdmin(request)){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
 
@@ -97,9 +97,28 @@ public class UserController {
         return ResponseUtils.success(userList);
     }
 
+    @GetMapping("/recommend")
+    public BaseResponse<List<User>> recommendUsers(){
+        QueryWrapper<User> queryWrapper =  new QueryWrapper<>();
+        List<User> userList = userService.list(queryWrapper);
+        List<User> result = userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
+        return ResponseUtils.success(result);
+    }
+
+    @PostMapping("/update")
+    public BaseResponse<Integer> updateUser(@RequestBody User user, HttpServletRequest request){
+        //判断是否为空
+        if(user == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        int result = userService.updateUser(user, loginUser);
+        return ResponseUtils.success(result);
+    }
+
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteUser(@RequestBody Long id, HttpServletRequest request){
-        if(!isAdmin(request)){
+        if(!userService.isAdmin(request)){
             throw new BusinessException(ErrorCode.NO_AUTH,"非管理员");
         }
 
@@ -121,16 +140,5 @@ public class UserController {
         User user = userService.getById(currentUser.getId());
         User safetyUser = userService.getSafetyUser(user);
         return ResponseUtils.success(safetyUser);
-    }
-
-    /**
-     * 是否为管理员
-     * @param request 请求
-     * @return boolean
-     */
-    private boolean isAdmin(HttpServletRequest request){
-        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
-        User user = (User) userObj;
-        return user != null && user.getUserRole() == ADMIN_ROLE;
     }
 }
