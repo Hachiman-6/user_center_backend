@@ -17,14 +17,12 @@ import user_center.mapper.UserMapper;
 import user_center.model.domain.User;
 import user_center.service.UserService;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static user_center.constant.userConstant.ADMIN_ROLE;
 import static user_center.constant.userConstant.USER_LOGIN_STATE;
 
 /**
@@ -185,6 +183,68 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
             return true;
         }).map(this::getSafetyUser).collect(Collectors.toList());
+    }
+
+    @Override
+    public int updateUser(User user, User loginUser) {
+        Long inputUserLongId = user.getId();
+        if(inputUserLongId == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //更新最近修改时间
+        user.setUpdateTime(new Date());
+        //更改密码时加密
+        if(user.getUserPassword() != null){
+            user.setUserPassword(DigestUtils.md5DigestAsHex((SALT + user.getUserPassword()).getBytes()));
+        }
+        int inputUserId = inputUserLongId.intValue();
+        if(inputUserId <= 0){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        //如果是管理员，可以修改所有的用户
+        //不是管理员只能修改自己的信息
+        if(!isAdmin(loginUser) && inputUserId != loginUser.getId()){
+            throw new BusinessException(ErrorCode.NO_AUTH);
+        }
+        User oldUser = userMapper.selectById(inputUserId);
+        if(oldUser == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        return userMapper.updateById(user);
+    }
+
+    @Override
+    public User getLoginUser(HttpServletRequest request) {
+        if(request == null){
+            return null;
+        }
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if(userObj == null){
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        return (User) userObj;
+    }
+
+    /**
+     * 判断是否为管理员
+     * @param request request
+     * @return boolean
+     */
+    @Override
+    public boolean isAdmin(HttpServletRequest request) {
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User user = (User) userObj;
+        return user != null && user.getUserRole() == ADMIN_ROLE;
+    }
+
+    /**
+     * 判断是否为管理员
+     * @param loginUser 当前登录用户
+     * @return boolean
+     */
+    @Override
+    public boolean isAdmin(User loginUser) {
+        return loginUser != null && loginUser.getUserRole() == ADMIN_ROLE;
     }
 
     //SQL方式过滤标签

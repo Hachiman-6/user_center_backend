@@ -2,6 +2,8 @@ package user_center.model.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Date;
 import lombok.Data;
 
@@ -11,7 +13,10 @@ import lombok.Data;
  */
 @TableName(value ="user")
 @Data
-public class User {
+public class User implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 7245623712341234123L;
     /**
      * id
      */
