@@ -3,7 +3,6 @@ package user_center.once;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
-import user_center.mapper.UserMapper;
 import user_center.model.domain.User;
 import user_center.service.UserService;
 
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class InsertUsers {
+public class InsertFakeUsers {
 
     @Resource
     private UserService userService;
