@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import user_center.common.BaseResponse;
@@ -17,6 +20,7 @@ import user_center.model.domain.request.UserRegisterRequest;
 import user_center.service.UserService;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static user_center.constant.userConstant.USER_LOGIN_STATE;
@@ -29,10 +33,14 @@ import static user_center.constant.userConstant.USER_LOGIN_STATE;
 @RestController
 @RequestMapping("/user")
 @CrossOrigin(origins = { "http://localhost:3000" })
+@Slf4j
 public class UserController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     @PostMapping("/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
@@ -98,10 +106,25 @@ public class UserController {
     }
 
     @GetMapping("/recommend")
-    public BaseResponse<Page<User>> recommendUsers(long pageSize, long pageNum){
+    public BaseResponse<Page<User>> recommendUsers(long pageSize, long pageNum, HttpServletRequest request){
+        User loginUser = userService.getLoginUser(request);
+        String redisKey = String.format("center:user:recommend:%s", loginUser.getId());
+        ValueOperations<String, Object> redisValueOperations = redisTemplate.opsForValue();
+        //如果有缓存，直接读缓存
+        Page<User> userPage = (Page<User>) redisValueOperations.get(redisKey);
+        if(userPage != null){
+            return ResponseUtils.success(userPage);
+        }
+        //没有缓存就查数据库
         QueryWrapper<User> queryWrapper =  new QueryWrapper<>();
-        Page<User> userListPage = userService.page(new Page<>(pageNum, pageSize),queryWrapper);
-        return ResponseUtils.success(userListPage);
+        userPage = userService.page(new Page<>(pageNum, pageSize),queryWrapper);
+        //写缓存
+        try {
+            redisValueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            log.error("redis set key error", e);
+        }
+        return ResponseUtils.success(userPage);
     }
 
     @PostMapping("/update")
