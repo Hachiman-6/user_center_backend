@@ -1,6 +1,7 @@
 package user_center.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
@@ -18,7 +19,6 @@ import user_center.service.UserService;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static user_center.constant.userConstant.ADMIN_ROLE;
 import static user_center.constant.userConstant.USER_LOGIN_STATE;
 
 /**
@@ -98,11 +98,10 @@ public class UserController {
     }
 
     @GetMapping("/recommend")
-    public BaseResponse<List<User>> recommendUsers(){
+    public BaseResponse<Page<User>> recommendUsers(long pageSize, long pageNum){
         QueryWrapper<User> queryWrapper =  new QueryWrapper<>();
-        List<User> userList = userService.list(queryWrapper);
-        List<User> result = userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
-        return ResponseUtils.success(result);
+        Page<User> userListPage = userService.page(new Page<>(pageNum, pageSize),queryWrapper);
+        return ResponseUtils.success(userListPage);
     }
 
     @PostMapping("/update")
