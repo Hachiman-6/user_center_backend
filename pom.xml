@@ -118,6 +118,11 @@
             <version>3.5.10.1</version>
         </dependency>
         <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-jsqlparser</artifactId>
+            <version>3.5.10.1</version> <!-- 确保版本和 MyBatis Plus 主包一致 -->
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.13.2</version>
