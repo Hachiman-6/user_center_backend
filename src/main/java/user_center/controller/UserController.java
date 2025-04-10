@@ -15,8 +15,8 @@ import user_center.common.ErrorCode;
 import user_center.common.ResponseUtils;
 import user_center.exception.BusinessException;
 import user_center.model.domain.User;
-import user_center.model.domain.request.UserLoginRequest;
-import user_center.model.domain.request.UserRegisterRequest;
+import user_center.model.request.UserLoginRequest;
+import user_center.model.request.UserRegisterRequest;
 import user_center.service.UserService;
 
 import java.util.List;
