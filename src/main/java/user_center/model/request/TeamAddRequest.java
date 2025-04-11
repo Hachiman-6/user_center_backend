@@ -1,26 +1,12 @@
-package user_center.model.domain;
+package user_center.model.request;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.util.Date;
 
-/**
- * 队伍
- * @TableName team
- */
-@TableName(value ="team")
 @Data
-public class Team {
-    /**
-     * id
-     */
-    @TableId(type = IdType.AUTO)
-    private Long id;
+public class TeamAddRequest {
 
     /**
      * 队伍名称
@@ -57,20 +43,4 @@ public class Team {
      * 密码
      */
     private String password;
-
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 
-     */
-    private Date updateTime;
-
-    /**
-     * 是否删除
-     */
-    @TableLogic
-    private Integer isDelete;
 }
