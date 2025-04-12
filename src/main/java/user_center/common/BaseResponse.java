@@ -2,6 +2,7 @@ package user_center.common;
 
 import lombok.Data;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 /**
@@ -13,6 +14,8 @@ import java.io.Serializable;
 @Data
 public class BaseResponse<T> implements Serializable {
 
+    @Serial
+    private static final long serialVersionUID = 5983520527579124015L;
     private int code;
 
     private T data;

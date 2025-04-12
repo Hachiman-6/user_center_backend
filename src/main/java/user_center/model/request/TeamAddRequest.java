@@ -3,11 +3,15 @@ package user_center.model.request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
-public class TeamAddRequest {
+public class TeamAddRequest implements Serializable {
 
+    @Serial
+    private static final long serialVersionUID = -5956119047139983572L;
     /**
      * 队伍名称
      */

@@ -4,7 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import user_center.common.PageRequest;
 
-import java.util.List;
+import java.io.Serial;
 
 
 /**
@@ -17,6 +17,11 @@ public class TeamQuery extends PageRequest {
      * id
      */
     private Long id;
+
+    /**
+     *搜索关键词(同时对队伍名称和描述进行搜索)
+     */
+    private String searchText;
 
     /**
      * 队伍名称
@@ -42,5 +47,8 @@ public class TeamQuery extends PageRequest {
      * 0 - 公开，1 - 私有，2 - 加密
      */
     private Integer status;
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 }
 
