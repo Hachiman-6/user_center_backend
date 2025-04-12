@@ -1,11 +1,10 @@
 package user_center.model.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -14,7 +13,7 @@ import java.util.Date;
  */
 @TableName(value ="user_team")
 @Data
-public class UserTeam {
+public class UserTeam implements Serializable {
     /**
      * id
      */
@@ -51,4 +50,8 @@ public class UserTeam {
      */
     @TableLogic
     private Integer isDelete;
+
+    @Serial
+    @TableField(exist = false)
+    private static final long serialVersionUID = 1L;
 }
