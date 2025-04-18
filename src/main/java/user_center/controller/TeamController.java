@@ -29,6 +29,7 @@ import user_center.service.UserTeamService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -93,10 +94,23 @@ public class TeamController {
         if (teamQuery == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
         boolean isAdmin = userService.isAdmin(request);
-        List<TeamUserVO> resultList = teamService.listTeams(teamQuery, isAdmin);
-        return ResponseUtils.success(resultList);
+        List<TeamUserVO> teamList = teamService.listTeams(teamQuery, isAdmin);
+        //判断队伍当前用户是否已加入
+        List<Long> teamIdList = teamList.stream().map(TeamUserVO::getId).toList();
+        try {
+            User loginUser = userService.getLoginUser(request);
+            QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+            userTeamQueryWrapper.eq("userId", loginUser);
+            userTeamQueryWrapper.in("teamId", teamIdList);
+            List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
+            Set<Long> hasJoinTeamIdSet = userTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
+            teamList.forEach(team ->{
+                boolean hasJoin = hasJoinTeamIdSet.contains(team.getId());
+                team.setHasJoin(hasJoin);
+            });
+        } catch (Exception e) {}
+        return ResponseUtils.success(teamList);
     }
 
     // todo 分页
