@@ -32,7 +32,7 @@ import static user_center.constant.userConstant.USER_LOGIN_STATE;
  */
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = { "http://localhost:3000" })
+@CrossOrigin(origins = {"http://localhost:3000"})
 @Slf4j
 public class UserController {
 
@@ -43,15 +43,15 @@ public class UserController {
     private RedisTemplate<String, Object> redisTemplate;
 
     @PostMapping("/register")
-    public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest){
-        if(userRegisterRequest == null){
+    public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
+        if (userRegisterRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
         String planetCode = userRegisterRequest.getPlanetCode();
-        if(StringUtils.isAnyBlank(userAccount,userPassword,checkPassword,planetCode)){
+        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword, planetCode)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         long result = userService.userRegister(userAccount, userPassword, checkPassword, planetCode);
@@ -59,13 +59,13 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request){
-        if(userLoginRequest == null){
+    public BaseResponse<User> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+        if (userLoginRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         String userAccount = userLoginRequest.getUserAccount();
         String userPassword = userLoginRequest.getUserPassword();
-        if(StringUtils.isAnyBlank(userAccount,userPassword)){
+        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User result = userService.userLogin(userAccount, userPassword, request);
@@ -73,8 +73,8 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public BaseResponse<Integer> userLogout(HttpServletRequest request){
-        if(request == null){
+    public BaseResponse<Integer> userLogout(HttpServletRequest request) {
+        if (request == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         int result = userService.userLogout(request);
@@ -82,14 +82,14 @@ public class UserController {
     }
 
     @GetMapping("/search")
-    public BaseResponse<List<User>> searchUsers(String username, HttpServletRequest request){
-        if(!userService.isAdmin(request)){
+    public BaseResponse<List<User>> searchUsers(String username, HttpServletRequest request) {
+        if (!userService.isAdmin(request)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
 
-        QueryWrapper<User> queryWrapper =  new QueryWrapper<>();
-        if(StringUtils.isNotBlank(username)){
-            queryWrapper.like("username",username);
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        if (StringUtils.isNotBlank(username)) {
+            queryWrapper.like("username", username);
         }
         List<User> userList = userService.list(queryWrapper);
         List<User> result = userList.stream().map(user -> userService.getSafetyUser(user)).collect(Collectors.toList());
@@ -97,27 +97,28 @@ public class UserController {
     }
 
     @GetMapping("/search/tags")
-    public BaseResponse<List<User>> searchUsersByTags(@RequestParam(required = false) List<String> tagNameList){
-        if(CollectionUtils.isEmpty(tagNameList)){
+    public BaseResponse<List<User>> searchUsersByTags(@RequestParam(required = false) List<String> tagNameList) {
+        if (CollectionUtils.isEmpty(tagNameList)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         List<User> userList = userService.searchUsersByTags(tagNameList);
         return ResponseUtils.success(userList);
     }
 
+    //todo 推荐未实现
     @GetMapping("/recommend")
-    public BaseResponse<Page<User>> recommendUsers(long pageSize, long pageNum, HttpServletRequest request){
+    public BaseResponse<Page<User>> recommendUsers(long pageSize, long pageNum, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         String redisKey = String.format("center:user:recommend:%s", loginUser.getId());
         ValueOperations<String, Object> redisValueOperations = redisTemplate.opsForValue();
         //如果有缓存，直接读缓存
         Page<User> userPage = (Page<User>) redisValueOperations.get(redisKey);
-        if(userPage != null){
+        if (userPage != null) {
             return ResponseUtils.success(userPage);
         }
         //没有缓存就查数据库
-        QueryWrapper<User> queryWrapper =  new QueryWrapper<>();
-        userPage = userService.page(new Page<>(pageNum, pageSize),queryWrapper);
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        userPage = userService.page(new Page<>(pageNum, pageSize), queryWrapper);
         //写缓存
         try {
             redisValueOperations.set(redisKey, userPage, 30000, TimeUnit.MILLISECONDS);
@@ -128,9 +129,9 @@ public class UserController {
     }
 
     @PostMapping("/update")
-    public BaseResponse<Integer> updateUser(@RequestBody User user, HttpServletRequest request){
+    public BaseResponse<Integer> updateUser(@RequestBody User user, HttpServletRequest request) {
         //判断是否为空
-        if(user == null){
+        if (user == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
@@ -139,12 +140,12 @@ public class UserController {
     }
 
     @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteUser(@RequestBody Long id, HttpServletRequest request){
-        if(!userService.isAdmin(request)){
-            throw new BusinessException(ErrorCode.NO_AUTH,"非管理员");
+    public BaseResponse<Boolean> deleteUser(@RequestBody Long id, HttpServletRequest request) {
+        if (!userService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH, "非管理员");
         }
 
-        if (id <= 0){
+        if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         Boolean result = userService.removeById(id);
@@ -152,15 +153,31 @@ public class UserController {
     }
 
     @GetMapping("/current")
-    public BaseResponse<User> getCurrentUser(HttpServletRequest request){
+    public BaseResponse<User> getCurrentUser(HttpServletRequest request) {
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) userObj;
-        if(currentUser == null){
+        if (currentUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
         //TODO 校验用户是否权限合法
         User user = userService.getById(currentUser.getId());
         User safetyUser = userService.getSafetyUser(user);
         return ResponseUtils.success(safetyUser);
+    }
+
+    /**
+     * 获取最匹配的用户
+     *
+     * @param num
+     * @param request
+     * @return
+     */
+    @GetMapping("/match")
+    public BaseResponse<List<User>> matchUsers(long num, HttpServletRequest request) {
+        if (num <= 0 || num > 20) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        return ResponseUtils.success(userService.matchUsers(num, loginUser));
     }
 }
