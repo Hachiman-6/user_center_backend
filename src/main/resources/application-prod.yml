@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    #驱动类名称
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    #数据库连接的url
+    url: jdbc:mysql://localhost:xxxx/xxxx
+    #连接数据库的用户名
+    username: root
+    #连接数据库的密码
+    password: xxxxxx
+  #session 失效时间
+  session:
+    timeout: 86400
+
+#生产环境下不生成Knife4j接口文档
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
